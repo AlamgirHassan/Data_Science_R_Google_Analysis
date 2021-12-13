@@ -1,0 +1,77 @@
+---
+title: "Google_Analysis_Part(1)"
+author: "18F-0149"
+date: "12/13/2021"
+output: pdf_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## R Markdown
+
+This is an R Markdown document. Markdown is a simple formatting syntax for authoring HTML, PDF, and MS Word documents. For more details on using R Markdown see <http://rmarkdown.rstudio.com>.
+
+When you click the **Knit** button a document will be generated that includes both content as well as the output of any embedded R code chunks within the document. You can embed an R code chunk like this:
+
+```{r cars}
+install.packages("gtrendsR")
+library(tidyverse)
+library(gtrendsR)
+install.packages('ggplot2')
+library(ggplot2)
+options(max.print=1000000)
+#Getting dataset
+data<-gtrends(keyword = 'Machine Learning',geo='',time='all',gprop = c("web", "news", "images", "froogle", "youtube"))
+#Extracting data on basics of interest by country
+countries_data<-data$interest_by_country
+#Removing 'NA' values from dataset
+countries_data<-na.omit(countries_data)
+countries_data<-head(countries_data)
+
+#Getting dataset
+my_data<-gtrends(keyword = 'Machine Learning',geo='',time='today+5-y',gprop = c("web", "news", "images", "froogle", "youtube"))
+#Extracting dataset on basics of interest over time
+yearly_data<-data.frame(my_data$interest_over_time)
+#Creating data of dates on basic of their years
+dates<-format(yearly_data$date,format = "%Y")
+#Removing dulplcates from years
+dates<-dates[!duplicated(dates)]
+#Creating a vector
+hits_counts <- c(rep(0, length(dates)))
+#This loop will extract dates on basics of their year
+#After that it will increment the value of hits of that year
+for(i in 1:nrow(yearly_data))
+{
+
+  date1<-format(yearly_data[i,1],format = "%Y")
+
+  for(j in 1:length(dates))
+  {
+    if(date1==dates[j])
+    {
+      
+      hits_counts[j]=hits_counts[j]+1
+      break
+    }
+  }
+
+  
+}
+```
+
+## Including Plots
+
+You can also embed plots, for example:
+
+```{r pressure, echo=FALSE}
+barplot(countries_data$hits,xlab = 'Countries',ylab = 'Hits',names.arg = countries_data$location,main="Google Trends of 'Machine Learning' in Countries",col='blue',border='black',las=2)
+
+#Plotting graph
+plot(dates, hits_counts, type = "l",ylim=c(0,100),xlab='Years',ylab='Hit counts',main="Hits with respect to years of 'Machine Learning'")
+
+
+```
+
+Note that the `echo = FALSE` parameter was added to the code chunk to prevent printing of the R code that generated the plot.
